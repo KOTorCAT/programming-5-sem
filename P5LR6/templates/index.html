@@ -5,61 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Currency Rate Observer</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1><i class="fas fa-chart-line"></i> Currency Rate Observer</h1>
+            <h1>Currency Rate Observer</h1>
             <div class="connection-status">
-                <span id="status-indicator" class="status-offline"></span>
+                <span id="status-indicator" class="status-disconnected"></span>
                 <span id="status-text">Connecting...</span>
             </div>
         </header>
 
         <div class="client-info">
             <div class="info-card">
-                <h3><i class="fas fa-id-card"></i> Client Information</h3>
+                <h3>Client Information</h3>
                 <p><strong>Client ID:</strong> <span id="client-id">---</span></p>
                 <p><strong>Connected:</strong> <span id="connected-time">---</span></p>
-                <p><strong>Messages received:</strong> <span id="message-count">0</span></p>
+                <p><strong>Messages:</strong> <span id="message-count">0</span></p>
                 <p><strong>Server:</strong> {{ host }}:{{ port }}</p>
                 <p><strong>Mode:</strong> 
-                    <span class="mode-indicator">
-                        {% if test_mode %}
-                            Test
-                        {% else %}
-                            Production
-                        {% end %}
-                    </span>
+                    {% if test_mode %}
+                        Test
+                    {% else %}
+                        Production
+                    {% end %}
                 </p>
             </div>
         </div>
 
         <div class="controls">
             <div class="control-group">
-                <h3><i class="fas fa-sliders-h"></i> Controls</h3>
-                <button id="subscribe-all" class="btn btn-primary">
-                    <i class="fas fa-bell"></i> Subscribe to All
+                <h3>Controls</h3>
+                <button id="subscribe-all" class="btn">
+                    Subscribe to All
                 </button>
-                <button id="subscribe-selected" class="btn btn-secondary">
-                    <i class="fas fa-bell"></i> Subscribe to Selected
+                <button id="subscribe-selected" class="btn">
+                    Subscribe to Selected
                 </button>
-                <button id="get-rates" class="btn btn-info">
-                    <i class="fas fa-sync"></i> Get Current Rates
+                <button id="get-rates" class="btn">
+                    Get Current Rates
                 </button>
                 {% if test_mode %}
-                <button id="simulate-change" class="btn btn-warning">
-                    <i class="fas fa-vial"></i> Simulate Change
+                <button id="simulate-change" class="btn">
+                    Simulate Change
                 </button>
                 {% end %}
-                <button id="clear-log" class="btn btn-danger">
-                    <i class="fas fa-trash"></i> Clear Log
+                <button id="clear-log" class="btn">
+                    Clear Log
                 </button>
             </div>
 
             <div class="currency-selection">
-                <h3><i class="fas fa-coins"></i> Currency Selection</h3>
+                <h3>Currency Selection</h3>
                 <div class="currency-grid">
                     {% for currency in currencies %}
                     <div class="currency-checkbox">
@@ -74,7 +71,7 @@
 
         <div class="main-content">
             <div class="rates-panel">
-                <h3><i class="fas fa-exchange-alt"></i> Current Exchange Rates</h3>
+                <h3>Current Exchange Rates</h3>
                 <div class="rates-table-container">
                     <table class="rates-table">
                         <thead>
@@ -82,15 +79,12 @@
                                 <th>Currency</th>
                                 <th>Code</th>
                                 <th>Rate (RUB)</th>
-                                <th>Previous</th>
                                 <th>Change</th>
-                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="rates-body">
-                            <!-- Rates will be populated by JavaScript -->
                             <tr>
-                                <td colspan="6" class="loading">Loading rates...</td>
+                                <td colspan="4">Loading rates...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -98,13 +92,12 @@
             </div>
 
             <div class="log-panel">
-                <h3><i class="fas fa-history"></i> Live Updates</h3>
+                <h3>Live Updates</h3>
                 <div class="log-controls">
                     <div class="filter-buttons">
                         <button class="filter-btn active" data-filter="all">All</button>
                         <button class="filter-btn" data-filter="increase">Increases</button>
                         <button class="filter-btn" data-filter="decrease">Decreases</button>
-                        <button class="filter-btn" data-filter="new">New</button>
                         <button class="filter-btn" data-filter="system">System</button>
                     </div>
                     <div class="log-info">
@@ -112,11 +105,9 @@
                     </div>
                 </div>
                 <div class="log-container" id="log-container">
-                    <!-- Log messages will be added here -->
                     <div class="log-entry system">
                         <div class="log-time">--:--:--</div>
                         <div class="log-content">
-                            <i class="fas fa-info-circle"></i>
                             <span>Waiting for updates...</span>
                         </div>
                     </div>
@@ -125,16 +116,11 @@
         </div>
 
         <footer class="footer">
-            <p>Currency Rate Observer &copy; 2023 | 
-                Data source: <a href="https://www.cbr-xml-daily.ru" target="_blank">Central Bank of Russia API</a> |
-                Pattern: <strong>Observer</strong> |
-                <span id="last-update">Last update: --:--:--</span>
-            </p>
+            <p>Currency Rate Observer | Data source: CBR API | Pattern: Observer</p>
         </footer>
     </div>
 
     <script>
-        // Конфигурация - ИСПРАВЛЕННАЯ ВЕРСИЯ
         const CONFIG = {
             host: "{{ host }}",
             port: {{ port }},
@@ -142,7 +128,6 @@
             currencies: {% raw json.dumps(currencies) %}
         };
 
-        // Глобальные переменные
         let ws = null;
         let clientId = null;
         let connectedTime = null;
@@ -150,34 +135,25 @@
         let currentRates = {};
         let logEntries = [];
         
-        // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             initWebSocket();
             setupEventListeners();
-            updateCurrentRatesTable();
         });
         
-        // Инициализация WebSocket соединения
         function initWebSocket() {
             const wsUrl = `ws://${CONFIG.host}:${CONFIG.port}/ws`;
             ws = new WebSocket(wsUrl);
             
             ws.onopen = function() {
-                updateStatus('connected', 'Connected to server');
+                updateStatus('connected', 'Connected');
                 connectedTime = new Date();
                 updateConnectedTime();
-                
-                // Запускаем периодическое обновление времени подключения
                 setInterval(updateConnectedTime, 1000);
-                
-                // Отправляем ping каждые 30 секунд для поддержания соединения
                 setInterval(sendPing, 30000);
             };
             
             ws.onclose = function() {
-                updateStatus('disconnected', 'Disconnected from server');
-                
-                // Пытаемся переподключиться через 5 секунд
+                updateStatus('disconnected', 'Disconnected');
                 setTimeout(function() {
                     if (ws.readyState === WebSocket.CLOSED) {
                         updateStatus('connecting', 'Reconnecting...');
@@ -199,13 +175,12 @@
                     const data = JSON.parse(event.data);
                     handleWebSocketMessage(data);
                 } catch (error) {
-                    console.error('Error parsing WebSocket message:', error);
-                    addLogEntry('system', `Error: Invalid message format`, true);
+                    console.error('Error parsing message:', error);
+                    addLogEntry('system', 'Error: Invalid message format', true);
                 }
             };
         }
         
-        // Обработка сообщений от WebSocket
         function handleWebSocketMessage(data) {
             const type = data.type;
             
@@ -213,60 +188,46 @@
                 case 'welcome':
                     handleWelcomeMessage(data);
                     break;
-                    
                 case 'rates_updated':
                     handleRatesUpdated(data);
                     break;
-                    
                 case 'current_rates':
                     handleCurrentRates(data);
                     break;
-                    
                 case 'subscription_updated':
                     handleSubscriptionUpdated(data);
                     break;
-                    
                 case 'pong':
-                    // Просто обновляем время последней активности
                     updateLastUpdateTime();
                     break;
-                    
                 case 'simulation_started':
-                    addLogEntry('system', `Simulation started: ${data.message}`, true);
+                    addLogEntry('system', `Simulation started`, true);
                     break;
-                    
                 case 'error':
                     addLogEntry('system', `Error: ${data.message}`, true);
                     break;
-                    
                 default:
                     console.log('Unknown message type:', type, data);
             }
         }
         
-        // Обработка приветственного сообщения
         function handleWelcomeMessage(data) {
             clientId = data.client_id;
             document.getElementById('client-id').textContent = clientId;
             
-            addLogEntry('system', `Connected with ID: ${clientId}`, true);
-            addLogEntry('system', data.message, true);
+            addLogEntry('system', `Connected: ${clientId}`, true);
             
-            // Загружаем начальные курсы
             if (data.current_rates) {
                 currentRates = data.current_rates;
                 updateCurrentRatesTable();
             }
             
-            // Подписываемся на выбранные валюты
             sendSubscription();
         }
         
-        // Обработка обновления курсов
         function handleRatesUpdated(data) {
             updateLastUpdateTime();
             
-            // Обновляем текущие курсы
             if (data.all_rates) {
                 for (const [code, rate] of Object.entries(data.all_rates)) {
                     if (currentRates[code]) {
@@ -276,7 +237,6 @@
                 }
             }
             
-            // Добавляем записи в лог для каждого изменения
             if (data.changes && data.changes.length > 0) {
                 data.changes.forEach(change => {
                     const changeType = change.type;
@@ -284,58 +244,44 @@
                     const name = change.name;
                     const oldRate = change.old_rate;
                     const newRate = change.new_rate;
-                    const changePercent = change.change_percent;
-                    const nominal = change.nominal || 1;
                     
                     let message = '';
-                    let icon = '';
                     
                     if (changeType === 'new') {
-                        message = `New currency: ${code} (${name}) added at ${newRate.toFixed(4)} RUB`;
-                        icon = 'fas fa-plus-circle';
+                        message = `New: ${code} (${name}) at ${newRate.toFixed(4)}`;
                     } else if (changeType === 'increase') {
-                        message = `${code} increased: ${oldRate.toFixed(4)} → ${newRate.toFixed(4)} RUB (${changePercent.toFixed(2)}%)`;
-                        icon = 'fas fa-arrow-up';
+                        message = `${code} ↑ ${oldRate.toFixed(4)} → ${newRate.toFixed(4)}`;
                     } else if (changeType === 'decrease') {
-                        message = `${code} decreased: ${oldRate.toFixed(4)} → ${newRate.toFixed(4)} RUB (${changePercent.toFixed(2)}%)`;
-                        icon = 'fas fa-arrow-down';
+                        message = `${code} ↓ ${oldRate.toFixed(4)} → ${newRate.toFixed(4)}`;
                     }
                     
-                    if (change.simulated) {
-                        message += ' [SIMULATED]';
-                    }
-                    
-                    addLogEntry(changeType, message, false, icon);
+                    addLogEntry(changeType, message, false);
                 });
                 
-                // Обновляем таблицу курсов
                 updateCurrentRatesTable();
             }
         }
         
-        // Обработка текущих курсов
         function handleCurrentRates(data) {
             if (data.rates) {
                 currentRates = data.rates;
                 updateCurrentRatesTable();
-                addLogEntry('system', 'Current rates updated', true);
+                addLogEntry('system', 'Rates updated', true);
             }
         }
         
-        // Обработка обновления подписки
         function handleSubscriptionUpdated(data) {
             const currencies = data.currencies.join(', ');
-            addLogEntry('system', `Subscription updated: ${currencies}`, true);
+            addLogEntry('system', `Subscribed to: ${currencies}`, true);
         }
         
-        // Обновление таблицы текущих курсов
         function updateCurrentRatesTable() {
             const tbody = document.getElementById('rates-body');
             
             if (Object.keys(currentRates).length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="loading">No rate data available</td>
+                        <td colspan="4">No data</td>
                     </tr>
                 `;
                 return;
@@ -351,7 +297,7 @@
                         <tr>
                             <td>Unknown</td>
                             <td>${currencyCode}</td>
-                            <td colspan="4" class="no-data">No data</td>
+                            <td colspan="2">No data</td>
                         </tr>
                     `;
                     return;
@@ -360,40 +306,27 @@
                 const value = rateInfo.value || 0;
                 const previous = rateInfo.previous || value;
                 const change = value - previous;
-                const changePercent = previous !== 0 ? (change / previous) * 100 : 0;
                 
                 let changeClass = '';
-                let changeIcon = '';
                 let changeText = '';
                 
                 if (change > 0.001) {
                     changeClass = 'increase';
-                    changeIcon = '<i class="fas fa-arrow-up"></i>';
-                    changeText = `+${change.toFixed(4)} (+${changePercent.toFixed(2)}%)`;
+                    changeText = `+${change.toFixed(4)}`;
                 } else if (change < -0.001) {
                     changeClass = 'decrease';
-                    changeIcon = '<i class="fas fa-arrow-down"></i>';
-                    changeText = `${change.toFixed(4)} (${changePercent.toFixed(2)}%)`;
+                    changeText = `${change.toFixed(4)}`;
                 } else {
                     changeClass = 'neutral';
-                    changeIcon = '<i class="fas fa-minus"></i>';
-                    changeText = `0.0000 (0.00%)`;
+                    changeText = `0.0000`;
                 }
                 
                 html += `
                     <tr>
                         <td>${rateInfo.name}</td>
-                        <td><span class="currency-code">${currencyCode}</span></td>
-                        <td class="rate-value">${value.toFixed(4)}</td>
-                        <td class="rate-previous">${previous.toFixed(4)}</td>
-                        <td class="change ${changeClass}">
-                            ${changeIcon} ${changeText}
-                        </td>
-                        <td>
-                            <span class="status-badge ${changeClass}">
-                                ${changeClass.toUpperCase()}
-                            </span>
-                        </td>
+                        <td>${currencyCode}</td>
+                        <td>${value.toFixed(4)}</td>
+                        <td class="change ${changeClass}">${changeText}</td>
                     </tr>
                 `;
             });
@@ -401,21 +334,9 @@
             tbody.innerHTML = html;
         }
         
-        // Добавление записи в лог
-        function addLogEntry(type, message, isSystem = false, icon = null) {
+        function addLogEntry(type, message, isSystem = false) {
             const timestamp = new Date();
             const timeStr = timestamp.toLocaleTimeString();
-            
-            // Определяем иконку по умолчанию
-            if (!icon) {
-                switch(type) {
-                    case 'increase': icon = 'fas fa-arrow-up'; break;
-                    case 'decrease': icon = 'fas fa-arrow-down'; break;
-                    case 'new': icon = 'fas fa-plus-circle'; break;
-                    case 'system': icon = 'fas fa-info-circle'; break;
-                    default: icon = 'fas fa-exchange-alt';
-                }
-            }
             
             const logEntry = {
                 id: Date.now() + Math.random(),
@@ -423,25 +344,20 @@
                 timestamp: timestamp,
                 type: type,
                 message: message,
-                isSystem: isSystem,
-                icon: icon
+                isSystem: isSystem
             };
             
-            logEntries.unshift(logEntry); // Добавляем в начало
+            logEntries.unshift(logEntry);
             
-            // Ограничиваем количество записей в логе
             if (logEntries.length > 100) {
                 logEntries.pop();
             }
             
-            // Обновляем счетчик
             document.getElementById('log-count').textContent = `${logEntries.length} messages`;
             
-            // Добавляем в DOM
             addLogEntryToDOM(logEntry);
         }
         
-        // Добавление записи в DOM
         function addLogEntryToDOM(logEntry) {
             const logContainer = document.getElementById('log-container');
             
@@ -452,27 +368,21 @@
             
             logElement.innerHTML = `
                 <div class="log-time">${logEntry.time}</div>
-                <div class="log-content">
-                    <i class="${logEntry.icon}"></i>
-                    <span>${logEntry.message}</span>
-                </div>
+                <div class="log-content">${logEntry.message}</div>
             `;
             
-            // Добавляем в начало контейнера
             if (logContainer.firstChild) {
                 logContainer.insertBefore(logElement, logContainer.firstChild);
             } else {
                 logContainer.appendChild(logElement);
             }
             
-            // Удаляем сообщение "Waiting for updates..." если оно есть
             const waitingMsg = logContainer.querySelector('.log-entry.system:last-child');
-            if (waitingMsg && waitingMsg.querySelector('span').textContent === 'Waiting for updates...') {
+            if (waitingMsg && waitingMsg.querySelector('.log-content').textContent === 'Waiting for updates...') {
                 waitingMsg.remove();
             }
         }
         
-        // Отправка подписки на валюты
         function sendSubscription() {
             const selectedCurrencies = getSelectedCurrencies();
             
@@ -484,29 +394,25 @@
             sendWebSocketMessage(message);
         }
         
-        // Получение выбранных валют
         function getSelectedCurrencies() {
             const checkboxes = document.querySelectorAll('.currency-checkbox input:checked');
             return Array.from(checkboxes).map(cb => cb.value);
         }
         
-        // Отправка сообщения через WebSocket
         function sendWebSocketMessage(message) {
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify(message));
                 return true;
             } else {
-                addLogEntry('system', 'Cannot send message: WebSocket is not connected', true);
+                addLogEntry('system', 'Cannot send: Not connected', true);
                 return false;
             }
         }
         
-        // Отправка ping
         function sendPing() {
             sendWebSocketMessage({ type: 'ping' });
         }
         
-        // Обновление статуса подключения
         function updateStatus(status, text) {
             const indicator = document.getElementById('status-indicator');
             const statusText = document.getElementById('status-text');
@@ -515,61 +421,35 @@
             statusText.textContent = text;
         }
         
-        // Обновление времени подключения
         function updateConnectedTime() {
             if (connectedTime) {
                 const now = new Date();
-                const diffMs = now - connectedTime;
-                const diffSec = Math.floor(diffMs / 1000);
-                
-                const hours = Math.floor(diffSec / 3600);
-                const minutes = Math.floor((diffSec % 3600) / 60);
-                const seconds = diffSec % 60;
-                
-                let timeStr = '';
-                if (hours > 0) {
-                    timeStr = `${hours}h ${minutes}m ${seconds}s`;
-                } else if (minutes > 0) {
-                    timeStr = `${minutes}m ${seconds}s`;
-                } else {
-                    timeStr = `${seconds}s`;
-                }
-                
-                document.getElementById('connected-time').textContent = timeStr;
+                const diffSec = Math.floor((now - connectedTime) / 1000);
+                document.getElementById('connected-time').textContent = `${diffSec}s`;
             }
         }
         
-        // Обновление времени последнего обновления
         function updateLastUpdateTime() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString();
-            document.getElementById('last-update').textContent = `Last update: ${timeStr}`;
         }
         
-        // Настройка обработчиков событий
         function setupEventListeners() {
-            // Кнопка подписки на все валюты
             document.getElementById('subscribe-all').addEventListener('click', function() {
-                // Отмечаем все чекбоксы
                 document.querySelectorAll('.currency-checkbox input').forEach(cb => {
                     cb.checked = true;
                 });
-                
-                // Отправляем подписку
                 sendSubscription();
             });
             
-            // Кнопка подписки на выбранные валюты
             document.getElementById('subscribe-selected').addEventListener('click', function() {
                 sendSubscription();
             });
             
-            // Кнопка получения текущих курсов
             document.getElementById('get-rates').addEventListener('click', function() {
                 sendWebSocketMessage({ type: 'get_rates' });
             });
             
-            // Кнопка имитации изменений (только в тестовом режиме)
             const simulateBtn = document.getElementById('simulate-change');
             if (simulateBtn) {
                 simulateBtn.addEventListener('click', function() {
@@ -577,7 +457,6 @@
                 });
             }
             
-            // Кнопка очистки лога
             document.getElementById('clear-log').addEventListener('click', function() {
                 logEntries = [];
                 document.getElementById('log-container').innerHTML = '';
@@ -585,33 +464,23 @@
                 addLogEntry('system', 'Log cleared', true);
             });
             
-            // Фильтры лога
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    // Убираем активный класс со всех кнопок
                     document.querySelectorAll('.filter-btn').forEach(b => {
                         b.classList.remove('active');
                     });
-                    
-                    // Добавляем активный класс на текущую кнопку
                     this.classList.add('active');
-                    
-                    // Применяем фильтр
-                    const filter = this.dataset.filter;
-                    applyLogFilter(filter);
+                    applyLogFilter(this.dataset.filter);
                 });
             });
             
-            // Изменение выбора валют
             document.querySelectorAll('.currency-checkbox input').forEach(cb => {
                 cb.addEventListener('change', function() {
-                    // Автоматически отправляем подписку при изменении выбора
                     sendSubscription();
                 });
             });
         }
         
-        // Применение фильтра к логу
         function applyLogFilter(filterType) {
             const logEntries = document.querySelectorAll('.log-entry');
             
@@ -619,8 +488,8 @@
                 const entryType = entry.dataset.type;
                 
                 if (filterType === 'all' || 
-                    (filterType === 'system' && entry.dataset.type === 'system') ||
-                    (filterType === entryType && entry.dataset.type !== 'system')) {
+                    (filterType === 'system' && entryType === 'system') ||
+                    (filterType === entryType && entryType !== 'system')) {
                     entry.style.display = 'flex';
                 } else {
                     entry.style.display = 'none';

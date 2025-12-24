@@ -39,9 +39,7 @@ currency-observer/
 python3 -m venv venv
 
 # Активация виртуального окружения
-source venv/bin/activate  # Linux/Mac
-# или
-venv\Scripts\activate     # Windows
+source venv/bin/activate   
 
 # Установка библиотек
 pip install -r requirements.txt
@@ -72,16 +70,6 @@ http://localhost:8888
 ## Конфигурация
 
 Основные настройки находятся в файле `config.py`:
-
-```python
-API_CONFIG = {
-    "url": "https://www.cbr-xml-daily.ru/daily_json.js",
-    "update_interval_ms": 300000,  # 5 минут
-    "poll_interval_ms": 60000,     # 1 минута (для тестового режима)
-}
-
-CURRENCIES_TO_TRACK = ["USD", "EUR", "GBP", "CNY", "JPY"]
-```
 
 ## API и протоколы
 
