@@ -71,7 +71,7 @@ def delete_term(term_name: str, db: Session = Depends(get_db)):
 
 # Для запуска без Docker
 if __name__ == "__main__":
-    print("🚀 Запуск сервера на http://localhost:8000")
-    print("📚 Swagger UI: http://localhost:8000/docs")
-    print("📖 ReDoc: http://localhost:8000/redoc")
+    print(" Запуск сервера на http://localhost:8000")
+    print(" Swagger UI: http://localhost:8000/docs")
+    print(" ReDoc: http://localhost:8000/redoc")
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
