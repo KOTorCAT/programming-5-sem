@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+    glossary_service:
+        build: 
+            context: .
+            dockerfile: glossary_service/Dockerfile
+        image: glossary-service
+        networks:
+            - glossary-net
+        ports:
+            - "50051:50051"
+
+    web_gateway:
+        build:
+            context: .
+            dockerfile: web_gateway/Dockerfile
+        environment:
+            GLOSSARY_HOST: glossary_service
+        image: web-gateway
+        networks:
+            - glossary-net
+        ports:
+            - "5000:5000"
+        depends_on:
+            - glossary_service
+
+networks:
+    glossary-net:

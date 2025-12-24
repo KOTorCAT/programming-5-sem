@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simple-openweather-client"
+version = "0.1.0"
+authors = [
+    {name = "Radimir", email = "radimir@example.com"}
+]
+description = "Simple OpenWeather API client"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/radimir/simple-openweather-client"
+Repository = "https://github.com/radimir/simple-openweather-client"
+
+[project.scripts]
+get-weather = "simple_openweather_client.client:main"

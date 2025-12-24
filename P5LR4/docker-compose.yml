@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  glossary-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data  # Монтируем директорию с данными
+    restart: unless-stopped

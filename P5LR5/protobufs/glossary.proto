@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package glossary;
+
+enum TermCategory {
+    GENERAL = 0;
+    FUNCTIONS = 1;
+    CLASSES = 2;
+    MODULES = 3;
+    SYNTAX = 4;
+}
+
+message TermRequest {
+    string term_name = 1;
+    TermCategory category = 2;
+    int32 max_results = 3;
+}
+
+message GlossaryTerm {
+    string id = 1;
+    string name = 2;
+    string definition = 3;
+    TermCategory category = 4;
+}
+
+message GlossaryResponse {
+    repeated GlossaryTerm terms = 1;
+}
+
+service GlossaryService {
+    rpc GetTerms (TermRequest) returns (GlossaryResponse);
+    rpc GetAllTerms (Empty) returns (GlossaryResponse);
+}
+
+message Empty {}
